@@ -34,4 +34,12 @@ Some other small improvements.</PackageReleaseNotes>
         <UnityPublish>true</UnityPublish>
     </PropertyGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\..\Arch\src\Arch\Arch.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="ZeroAllocJobScheduler" Version="1.1.2" />
+    </ItemGroup>
+
 </Project>
