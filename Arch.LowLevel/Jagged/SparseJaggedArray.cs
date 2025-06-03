@@ -13,20 +13,26 @@ using System.Runtime.CompilerServices;
 /// <typeparam name="T"></typeparam>
 public record struct SparseBucket<T>
 {
-    
     /// <summary>
     ///     The items array.
     /// </summary>
     internal T[] Array = System.Array.Empty<T>();
+    
+    /// <summary>
+    ///     The filler, the default value.
+    /// </summary>
+    private readonly T _filler;
 
     /// <summary>
     ///     Creates an instance of the <see cref="Bucket{T}"/>.
     /// </summary>
     /// <param name="capacity">The total capacity.</param>
+    /// <param name="filler">The filler.</param>
     /// <param name="allocate">If it should allocate straight forward.</param>
-    public SparseBucket(int capacity, bool allocate = false)
+    public SparseBucket(int capacity, T filler, bool allocate = false)
     {
         Capacity = capacity;
+        _filler = filler;
         if (allocate)
         {
             EnsureCapacity();
@@ -79,6 +85,7 @@ public record struct SparseBucket<T>
         }
         
         Array = new T[Capacity];
+        Clear();
     }
 
     /// <summary>
@@ -106,12 +113,12 @@ public record struct SparseBucket<T>
     }
     
     /// <summary>
-    ///     Clears this <see cref="SparseBucket{T}"/> and sets all values to the <see cref="filler"/>.
+    ///     Clears this <see cref="SparseBucket{T}"/> and sets all values to the <see cref="_filler"/>.
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void Clear(T filler = default)
+    public void Clear()
     {
-        System.Array.Fill(Array, filler);
+        System.Array.Fill(Array, _filler);
     }
 }
 
@@ -165,9 +172,9 @@ public class SparseJaggedArray<T>
         // Fill buckets
         for (var i = 0; i < _buckets.Length; i++)
         {
-            var bucket = new SparseBucket<T>(_bucketSize);
+            var bucket = new SparseBucket<T>(_bucketSize, _filler);
             SetBucket(i, in bucket);
-            bucket.Clear(_filler);
+            bucket.Clear();
         }
     }
 
@@ -189,9 +196,9 @@ public class SparseJaggedArray<T>
         // Fill buckets
         for (var i = 0; i < _buckets.Length; i++)
         {
-            var bucket = new SparseBucket<T>(_bucketSize);
+            var bucket = new SparseBucket<T>(_bucketSize, filler);
             SetBucket(i, in bucket);
-            bucket.Clear(_filler);
+            bucket.Clear();
         }
     }
     
@@ -259,9 +266,17 @@ public class SparseJaggedArray<T>
         }
 
         IndexToSlot(index, out var bucketIndex, out var itemIndex);
-        ref var item = ref GetBucket(bucketIndex)[itemIndex];
-
+        
+        // Bucket empty? return false
+        ref var bucket = ref GetBucket(bucketIndex);
+        if (bucket.IsEmpty)
+        {
+            value = _filler;
+            return false;
+        }
+        
         // If the item is the default then the nobody set its value.
+        ref var item = ref bucket[itemIndex];
         if (EqualityComparer<T>.Default.Equals(item, _filler))
         {
             value = _filler;
@@ -289,9 +304,17 @@ public class SparseJaggedArray<T>
         }
         
         IndexToSlot(index, out var bucketIndex, out var itemIndex);
-        ref var item = ref GetBucket(bucketIndex)[itemIndex];
-
+        
+        // Bucket empty? return false
+        ref var bucket = ref GetBucket(bucketIndex);
+        if (bucket.IsEmpty)
+        {
+            @bool = false;
+            return ref Unsafe.NullRef<T>(); 
+        }
+        
         // If the item is the default then the nobody set its value.
+        ref var item = ref bucket[itemIndex];
         if (EqualityComparer<T>.Default.Equals(item, _filler))
         {
             @bool = false;
@@ -316,8 +339,9 @@ public class SparseJaggedArray<T>
         }
         
         IndexToSlot(index, out var bucketIndex, out var itemIndex);
-        ref var bucket = ref GetBucket(bucketIndex);
         
+        // If bucket empty return false
+        ref var bucket = ref GetBucket(bucketIndex);
         if (bucket.IsEmpty)
         {
             return false;
@@ -342,13 +366,13 @@ public class SparseJaggedArray<T>
 
         var length = Buckets;
         var buckets = newCapacity / _bucketSize + 1;
-        Array.Resize(ref _buckets, buckets);
+        _buckets = Array.Resize(ref _buckets, buckets);
 
         for (var i = length; i < _buckets.Length; i++)
         {
-            var bucket = new SparseBucket<T>(_bucketSize);
+            var bucket = new SparseBucket<T>(_bucketSize, _filler);
             SetBucket(i, bucket);
-            bucket.Clear(_filler);
+            bucket.Clear();
         }
     }
 
@@ -372,7 +396,7 @@ public class SparseJaggedArray<T>
         }
 
         var buckets = _buckets.Length-count;
-        Array.Resize(ref _buckets, buckets);
+        _buckets = Array.Resize(ref _buckets, buckets);
     }
 
     /// <summary>
@@ -440,7 +464,7 @@ public class SparseJaggedArray<T>
                 continue;
             }
             
-            bucket.Clear(_filler);
+            bucket.Clear();
         }
     }
 }

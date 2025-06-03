@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
         <TargetFrameworks>net7.0; net6.0; netstandard2.1</TargetFrameworks>
@@ -11,13 +11,11 @@
 
         <PackageId>Arch.System</PackageId>
         <Title>Arch.System</Title>
-        <Version>1.0.5</Version>
+        <Version>1.1.0</Version>
         <Authors>genaray</Authors>
         <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
         <Description>A systems framework for arch.</Description>
-        <PackageReleaseNotes>Added `.Get` and `.Find`.
-Added Metrics which can be enabled via flags in the source.
-Some other small improvements.</PackageReleaseNotes>
+        <PackageReleaseNotes>Made group extendible. </PackageReleaseNotes>
         <PackageTags>c#;.net;.net6;.net7;ecs;game;entity;gamedev; game-development; game-engine; entity-component-system; arch;</PackageTags>
 
         <PackageProjectUrl>https://github.com/genaray/Arch.Extended</PackageProjectUrl>
@@ -35,11 +33,21 @@ Some other small improvements.</PackageReleaseNotes>
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\Arch\src\Arch\Arch.csproj" />
+        <None Update="Templates\GenericAttributes.tt">
+            <Generator>TextTemplatingFileGenerator</Generator>
+            <LastGenOutput>GenericAttributes.cs</LastGenOutput>
+        </None>
+    </ItemGroup>
+    
+    <ItemGroup>
+      <Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="ZeroAllocJobScheduler" Version="1.1.2" />
+      <Compile Update="Templates\GenericAttributes.cs">
+        <DesignTime>True</DesignTime>
+        <AutoGen>True</AutoGen>
+        <DependentUpon>GenericAttributes.tt</DependentUpon>
+      </Compile>
     </ItemGroup>
-
 </Project>
