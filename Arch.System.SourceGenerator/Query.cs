@@ -430,6 +430,17 @@ public static class QueryUtils
                             {{(queryMethod.IsStatic ? "" : "self.")}}{{queryMethod.MethodName}}({{insertParams}});
                         }
                         
+                        public void RunVectorized(int fromEntityIndex, int toEntityIndex) {
+                            {{(queryMethod.IsEntityQuery ? "ref var entityFirstElement = ref chunk.Entity(0);" : "")}}
+                            {{getFirstElements}}
+                            for (var entityIndex = fromEntityIndex; entityIndex < toEntityIndex; entityIndex++)
+                            {
+                                {{(queryMethod.IsEntityQuery ? $"ref readonly var {queryMethod.EntityParameter.Name.ToLower()} = ref Unsafe.Add(ref entityFirstElement, entityIndex);" : "")}}
+                                {{getComponents}}
+                                {{(queryMethod.IsStatic ? "" : "self.")}}{{queryMethod.MethodName}}({{insertParams}});
+                            }
+                        }
+                        
                         public void SetChunk(Chunk chunk)
                         {
                             this.chunk = chunk;
