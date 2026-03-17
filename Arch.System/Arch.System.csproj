@@ -51,4 +51,8 @@
         <DependentUpon>GenericAttributes.tt</DependentUpon>
       </Compile>
     </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\..\ZeroAllocJobScheduler\JobScheduler\Schedulers.csproj" />
+    </ItemGroup>
 </Project>

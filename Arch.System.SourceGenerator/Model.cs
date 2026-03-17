@@ -108,4 +108,10 @@ public struct QueryMethod
     /// <remarks>[Exclusive(typeof(Position), typeof(Velocity)] or its generic variant</remarks>
     /// </summary>
     public IList<ITypeSymbol> ExclusiveFilteredTypes { get; set; }
+
+    /// <summary>
+    /// The scheduler weight hint for the parallel job, emitted as a C# expression.
+    /// Passed to AdvancedInlineParallelChunkQuery to let the scheduler make better scheduling decisions.
+    /// </summary>
+    public string Hint { get; set; }
 }

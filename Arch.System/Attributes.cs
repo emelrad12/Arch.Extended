@@ -1,4 +1,6 @@
-﻿namespace Arch.System;
+﻿using Schedulers.Utils;
+
+namespace Arch.System;
 
 /// <summary>
 ///     Marks a method to generate a high performance query for it. 
@@ -10,6 +12,11 @@ public class QueryAttribute : global::System.Attribute
     /// If set to true, Query will be run in parallel.
     /// </summary>
     public bool Parallel { get; set; }
+
+    /// <summary>
+    /// Hints about the nature of the job, which can be used by the job scheduler to optimize scheduling.
+    /// </summary>
+    public ParallelJobProducerJobWeightHint Hint = ParallelJobProducerJobWeightHint.Medium;
 }
 
 /// <summary>

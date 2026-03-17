@@ -206,6 +206,10 @@ public static class QueryUtils
 
         var queryData = methodSymbol.GetAttributeData("Query");
         bool isParallel = (bool)(queryData.NamedArguments.FirstOrDefault(d => d.Key == "Parallel").Value.Value ?? false);
+        var hintArg = queryData.NamedArguments.FirstOrDefault(d => d.Key == "Hint");
+        var hint = hintArg.Key != null
+            ? $"({hintArg.Value.Type!.ToDisplayString(NullableFlowState.None, SymbolDisplayFormat.FullyQualifiedFormat)}){hintArg.Value.Value}"
+            : "global::Schedulers.Utils.ParallelJobProducerJobWeightHint.Medium";
 
         // Get attributes
         var attributeData = methodSymbol.GetAttributeData("All");
@@ -260,7 +264,8 @@ public static class QueryUtils
             AllFilteredTypes = allArray,
             AnyFilteredTypes = anyArray,
             NoneFilteredTypes = noneArray,
-            ExclusiveFilteredTypes = exclusiveArray
+            ExclusiveFilteredTypes = exclusiveArray,
+            Hint = hint
         };
         
         return isParallel ? sb.AppendParallelQueryMethod(ref queryMethod) : sb.AppendQueryMethod(ref queryMethod);
@@ -459,7 +464,7 @@ public static class QueryUtils
                         }
                         
                         var job = new {{queryMethod.MethodName}}QueryJobChunk() { {{jobParametersAssigment}} };
-                        return world.AdvancedInlineParallelChunkQuery(in {{queryMethod.MethodName}}_QueryDescription, job, parent, source);
+                        return world.AdvancedInlineParallelChunkQuery(in {{queryMethod.MethodName}}_QueryDescription, job, parent, source, {{queryMethod.Hint}});
                     }
                     
                     /// <summary>
@@ -477,7 +482,7 @@ public static class QueryUtils
                         
                         var job = new {{queryMethod.MethodName}}QueryJobChunk() { {{jobParametersAssigment}} };
                         var parentHandle = World.SharedJobScheduler!.Schedule();
-                        var handle = world.AdvancedInlineParallelChunkQuery(in {{queryMethod.MethodName}}_QueryDescription, job, parentHandle, default);
+                        var handle = world.AdvancedInlineParallelChunkQuery(in {{queryMethod.MethodName}}_QueryDescription, job, parentHandle, default, {{queryMethod.Hint}});
                         World.SharedJobScheduler.Flush(parentHandle);
                         handle.Wait();
                         return handle;
