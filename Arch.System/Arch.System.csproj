@@ -53,6 +53,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\..\ZeroAllocJobScheduler\JobScheduler\Schedulers.csproj" />
+      <ProjectReference Include="..\..\Arch\src\Arch\Arch.csproj" />
+      <ProjectReference Include="..\..\ZeroAllocJobScheduler\JobScheduler\Schedulers.csproj" />
     </ItemGroup>
 </Project>
